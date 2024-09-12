@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="{{ url_for('user_blueprint.home') }}">Ecommerce Shop</a>
+        <div class="navbar-nav">
+            <a href="{{ url_for('user_blueprint.logout') }}">Logout</a>
+            <a href="{{ url_for('admin_blueprint.admin_dashboard') }}">Admin Panel</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Manage Products</h1>
+        <ul>
+            {% for product in products %}
+                <li>
+                    <h2>{{ product.name }} - ${{ product.price }}</h2>
+                    <p>{{ product.description }}</p>
+                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+                    <form action="{{ url_for('admin_blueprint.remove_product', product_id=product.id) }}" method="POST">
+                        <button type="submit" class="btn btn-danger">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <footer>
+        <p>&copy; 2024 Ecommerce Shop</p>
+    </footer>
+</body>
+</html>
+    

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Orders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="{{ url_for('user_blueprint.home') }}">Ecommerce Shop</a>
+        <div class="navbar-nav">
+            <a href="{{ url_for('user_blueprint.logout') }}">Logout</a>
+            <a href="{{ url_for('admin_blueprint.admin_dashboard') }}">Admin Panel</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Orders</h1>
+        <p>View and manage customer orders here.</p>
+    </div>
+    
+    <footer>
+        <p>&copy; 2024 Ecommerce Shop</p>
+    </footer>
+</body>
+</html>
