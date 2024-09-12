@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 
 # Blueprint for user-related routes
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -23,6 +23,12 @@ products = [
     {"id": 15, "name": "Supermodel 5", "price": 1000, "description": "Supermodel in glamorous attire.", "image_url": "supermodel5.webp", "category": "Supermodel"},
 ]
 
+# Predefined users (Admin and Guest)
+users = {
+    "Giliboi": {"password": "admin", "role": "admin"},
+    "guest": {"password": "guest", "role": "user"}
+}
+
 # Home route displaying all products with sorting and search functionality
 @user_blueprint.route('/')
 def home():
@@ -33,7 +39,7 @@ def home():
 
     # Filter products by search and category
     filtered_products = [product for product in products if (search_query in product['name'].lower() or search_query in product['description'].lower())]
-    
+
     if category_filter != 'all':
         filtered_products = [product for product in filtered_products if product['category'] == category_filter]
 
@@ -58,7 +64,8 @@ def product_detail(product_id):
 @user_blueprint.route('/cart')
 def cart():
     cart_items = session.get('cart', [])
-    return render_template('cart.html', cart_items=cart_items)
+    total = sum(item['price'] for item in cart_items)  # Calculate total price
+    return render_template('cart.html', cart_items=cart_items, total=total)
 
 # Add to Cart route
 @user_blueprint.route('/add_to_cart/<int:product_id>', methods=['POST'])
@@ -70,15 +77,39 @@ def add_to_cart_route(product_id):
         session['cart'] = cart
     return redirect(url_for('user_blueprint.cart'))
 
+# Remove from Cart route
+@user_blueprint.route('/remove_from_cart/<int:product_id>', methods=['POST'])
+def remove_from_cart(product_id):
+    cart = session.get('cart', [])
+    cart = [item for item in cart if item['id'] != product_id]
+    session['cart'] = cart
+    return redirect(url_for('user_blueprint.cart'))
+
 # Login route
-@user_blueprint.route('/login')
+@user_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Authenticate the user
+        user = users.get(username)
+        if user and user['password'] == password:
+            session['username'] = username
+            session['role'] = user['role']
+            flash(f'Welcome, {username}!', 'success')
+            return redirect(url_for('user_blueprint.home'))
+        else:
+            flash('Invalid username or password', 'danger')
+            return redirect(url_for('user_blueprint.login'))
+    
     return render_template('login.html')
 
 # Logout route
 @user_blueprint.route('/logout')
 def logout():
     session.clear()
+    flash('You have been logged out', 'info')
     return redirect(url_for('user_blueprint.home'))
 
 # Route to clear the cart
@@ -87,3 +118,12 @@ def clear_cart():
     session['cart'] = []  # Empty the cart
     return redirect(url_for('user_blueprint.cart'))
 
+# Admin-only access route
+def admin_only(f):
+    def wrap(*args, **kwargs):
+        if session.get('role') != 'admin':
+            flash('Access denied. Admins only.', 'danger')
+            return redirect(url_for('user_blueprint.home'))
+        return f(*args, **kwargs)
+    wrap.__name__ = f.__name__
+    return wrap

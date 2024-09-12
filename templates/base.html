@@ -11,7 +11,9 @@
         <a href="{{ url_for('user_blueprint.home') }}" class="navbar-brand">Ecommerce Shop</a>
         <div class="navbar-nav">
             <a href="{{ url_for('user_blueprint.cart') }}" class="nav-item">Cart</a>
-            <a href="{{ url_for('admin_blueprint.admin_dashboard') }}" class="nav-item">Admin Panel</a>
+            {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_blueprint.admin_dashboard') }}" class="nav-item">Admin Panel</a>
+            {% endif %}
             {% if session.get('username') %}
                 <a href="{{ url_for('user_blueprint.logout') }}" class="nav-item">Logout</a>
             {% else %}
