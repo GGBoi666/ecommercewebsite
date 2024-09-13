@@ -21,7 +21,7 @@
         </div>
 
         <div class="search-filter">
-            <input type="text" id="search" placeholder="Search products..." class="form-control" value="{{ request.args.get('search', '') }}" oninput="window.location.href = '/?sort_by=' + document.getElementById('sort_by').value + '&search=' + this.value + '&category=' + document.getElementById('category').value;">
+            <input type="text" id="search" placeholder="Search products..." class="form-control" value="{{ request.args.get('search', '') }}" onkeypress="if(event.key === 'Enter'){ window.location.href = '/?sort_by=' + document.getElementById('sort_by').value + '&search=' + this.value + '&category=' + document.getElementById('category').value; }">
         </div>
 
         <div class="category-filter">
@@ -30,9 +30,19 @@
                 <option value="all">All Categories</option>
                 <option value="Jewish Temple">Jewish Temples</option>
                 <option value="Supermodel">Supermodels</option>
+                <option value="Amazon">Amazon</option>
+                <option value="AliExpress">AliExpress</option>
+                <option value="Etsy">Etsy</option>
+                <option value="Walmart">Walmart</option>
             </select>
         </div>
     </div>
+
+    {% if not products %}
+        <div class="alert alert-warning" role="alert">
+            No products found matching your criteria.
+        </div>
+    {% endif %}
 
     <!-- Jewish Temples Section -->
     <h3 class="section-title">Jewish Temples</h3>
@@ -45,7 +55,7 @@
                         <h5 class="card-title">{{ product.name }}</h5>
                         <p class="card-text">{{ product.description }}</p>
                         <p class="product-price"><strong>${{ product.price }}</strong></p>
-                        <form action="{{ url_for('user_blueprint.add_to_cart_route', product_id=product.id) }}" method="POST">
+                        <form action="{{ url_for('user_blueprint.add_to_cart_route', product_id=product.id) }}" method="POST" onsubmit="event.preventDefault(); addToCart({{ product.id }});">
                             <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
                         </form>
                     </div>
@@ -65,7 +75,7 @@
                         <h5 class="card-title">{{ product.name }}</h5>
                         <p class="card-text">{{ product.description }}</p>
                         <p class="product-price"><strong>${{ product.price }}</strong></p>
-                        <form action="{{ url_for('user_blueprint.add_to_cart_route', product_id=product.id) }}" method="POST">
+                        <form action="{{ url_for('user_blueprint.add_to_cart_route', product_id=product.id) }}" method="POST" onsubmit="event.preventDefault(); addToCart({{ product.id }});">
                             <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
                         </form>
                     </div>
@@ -73,6 +83,79 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- Amazon Products Section -->
+    <h3 class="section-title mt-5">Amazon Products</h3>
+    <div class="product-grid row row-cols-1 row-cols-md-3 g-4">
+        {% for product in products if product.category == 'Amazon' %}
+            <div class="col">
+                <div class="product-card shadow-sm">
+                    <img src="{{ url_for('static', filename='img/' + product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="product-info">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="product-price"><strong>${{ product.price }}</strong></p>
+                        <a href="{{ product.external_link }}" class="btn btn-success w-100" target="_blank">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- AliExpress Products Section -->
+    <h3 class="section-title mt-5">AliExpress Products</h3>
+    <div class="product-grid row row-cols-1 row-cols-md-3 g-4">
+        {% for product in products if product.category == 'AliExpress' %}
+            <div class="col">
+                <div class="product-card shadow-sm">
+                    <img src="{{ url_for('static', filename='img/' + product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="product-info">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="product-price"><strong>${{ product.price }}</strong></p>
+                        <a href="{{ product.external_link }}" class="btn btn-success w-100" target="_blank">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Etsy Products Section -->
+    <h3 class="section-title mt-5">Etsy Products</h3>
+    <div class="product-grid row row-cols-1 row-cols-md-3 g-4">
+        {% for product in products if product.category == 'Etsy' %}
+            <div class="col">
+                <div class="product-card shadow-sm">
+                    <img src="{{ url_for('static', filename='img/' + product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="product-info">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="product-price"><strong>${{ product.price }}</strong></p>
+                        <a href="{{ product.external_link }}" class="btn btn-success w-100" target="_blank">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Walmart Products Section -->
+    <h3 class="section-title mt-5">Walmart Products</h3>
+    <div class="product-grid row row-cols-1 row-cols-md-3 g-4">
+        {% for product in products if product.category == 'Walmart' %}
+            <div class="col">
+                <div class="product-card shadow-sm">
+                    <img src="{{ url_for('static', filename='img/' + product.image_url) }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="product-info">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description }}</p>
+                        <p class="product-price"><strong>${{ product.price }}</strong></p>
+                        <a href="{{ product.external_link }}" class="btn btn-success w-100" target="_blank">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
 </div>
 
 <!-- TradingView Widget -->
@@ -96,5 +179,17 @@
   "colorTheme": "dark",
   "locale": "en"
 }
+</script>
+
+<script>
+    function addToCart(productId) {
+        fetch(`/add_to_cart/${productId}`, {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart!');
+            }
+        });
+    }
 </script>
 {% endblock %}
