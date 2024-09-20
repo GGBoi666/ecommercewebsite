@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+<div class="container mt-4 cart-page">
+    <h2 class="text-center mb-4">Your Cart</h2>
+
+    {% if cart_items %}
+    <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-item d-flex align-items-center">
+            <img src="{{ url_for('static', filename='img/' + item['image_url']) }}" alt="{{ item['name'] }}" class="img-fluid">
+            <div class="cart-item-details">
+                <h5>{{ item['name'] }}</h5>
+                <p>Price: ${{ item['price'] }}</p>
+            </div>
+            <div class="cart-item-price d-flex align-items-center">
+                <strong>${{ item['price'] }}</strong>
+                <form action="{{ url_for('user_blueprint.remove_from_cart', product_id=item['id']) }}" method="POST" class="ml-3">
+                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="cart-total text-right">
+        Total: <strong>${{ total }}</strong>
+    </div>
+    <div class="text-right">
+        <a href="{{ url_for('user_blueprint.clear_cart') }}" class="btn btn-warning mt-3">Clear Cart</a>
+    </div>
+    <div class="text-right">
+        <a href="{{ url_for('user_blueprint.checkout') }}" class="btn btn-success mt-3">Proceed to Checkout</a>
+    </div>
+    {% else %}
+    <p class="text-center">Your cart is empty.</p>
+    {% endif %}
+</div>
+{% endblock %}
