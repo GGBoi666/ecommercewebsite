@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Admin Analytics Dashboard</h2>
+
+    <!-- Product Views Table -->
+    <h4>Product Views</h4>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Views</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_id, views in product_views.items() %}
+            <tr>
+                <td>{{ product_id }}</td>
+                <td>{{ products[product_id-1].name }}</td>
+                <td>{{ views }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Category Popularity Chart -->
+    <h4>Popular Categories</h4>
+    <canvas id="categoryChart"></canvas>
+
+    <!-- User Visits Chart -->
+    <h4>User Visits (Last 30 Days)</h4>
+    <canvas id="visitsChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Category Views Chart
+    var ctxCategory = document.getElementById('categoryChart').getContext('2d');
+    var categoryChart = new Chart(ctxCategory, {
+        type: 'bar',
+        data: {
+            labels: Object.keys({{ category_views|tojson }}),
+            datasets: [{
+                label: 'Category Views',
+                data: Object.values({{ category_views|tojson }}),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            }]
+        },
+    });
+
+    // User Visits Over Time Chart
+    var ctxVisits = document.getElementById('visitsChart').getContext('2d');
+    var visitsChart = new Chart(ctxVisits, {
+        type: 'line',
+        data: {
+            labels: {{ user_visits|map(attribute=0)|map('strftime', "%Y-%m-%d")|list|tojson }},
+            datasets: [{
+                label: 'User Visits',
+                data: {{ user_visits|map(attribute=1)|list|tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            }]
+        },
+    });
+</script>
+{% endblock %}

@@ -17,7 +17,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('user_blueprint.cart') }}"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    <a class="nav-link" href="{{ url_for('user_blueprint.cart') }}">
+                        <i class="fas fa-shopping-cart"></i> Cart
+                        <span class="badge badge-pill badge-primary">{{ session.get('cart_item_count', 0) }}</span>
+                    </a>
                 </li>
                 {% if session.get('role') == 'admin' %}
                 <li class="nav-item">
@@ -37,6 +40,22 @@
         </div>
     </nav>
 
+    <!-- Conditional ticker for the home page only -->
+    {% if request.endpoint == 'user_blueprint.home' %}
+    <div class="news-ticker-container">
+        <div class="ticker-wrapper">
+            <div class="ticker">
+                {% for headline in headlines %}
+                    <div class="ticker-item">
+                        <span class="news-category">Latest</span> <!-- Category tag like "Breaking News" -->
+                        <a href="{{ headline.link }}" target="_blank">{{ headline.title }}</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="container mt-4">
         {% block content %}{% endblock %}
     </div>
@@ -47,5 +66,23 @@
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Ticker Scrolling Script -->
+    <script>
+        window.onload = function () {
+            const ticker = document.querySelector('.ticker');
+            const tickerWrapper = document.querySelector('.ticker-wrapper');
+            const speed = 0.5; // Adjust this for scrolling speed
+
+            function scrollTicker() {
+                tickerWrapper.scrollLeft += speed;
+                if (tickerWrapper.scrollLeft >= ticker.scrollWidth - tickerWrapper.clientWidth) {
+                    tickerWrapper.scrollLeft = 0; // Loop back to the start
+                }
+            }
+
+            setInterval(scrollTicker, 30); // Adjust for smoother scrolling
+        };
+    </script>
 </body>
 </html>

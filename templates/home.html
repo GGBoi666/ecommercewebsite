@@ -6,6 +6,8 @@
 <div class="container">
     <h2 class="text-center my-4">Welcome to the Ecommerce Shop</h2>
 
+   
+
     <!-- TradingView Widget -->
     <div id="tradingview-widget"></div>
 
@@ -180,4 +182,16 @@
         });
     }
 </script>
+
+<script>
+    document.getElementById('search').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            const searchValue = document.getElementById('search').value;
+            if (searchValue === 'LETSGAMBLE') {  // Replace with your secret phrase
+                window.location.href = '/gamble';  // Redirect to the gambling page
+            }
+        }
+    });
+</script>
+
 {% endblock %}

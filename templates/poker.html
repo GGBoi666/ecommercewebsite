@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/poker.css') }}">
+</head>
+<body style="background-image: url('{{ url_for('static', filename='img/poker_bg.webp') }}'); background-size: cover;">
+    <div class="game-container">
+        <h1>Poker</h1>
+        <div id="game-status">
+            <p>Game Status: <span id="status-message">Place your bet to start the game</span></p>
+        </div>
+        <div class="balance">
+            <p>Your Balance: ₿<span id="balance">{{ balance }}</span> BTC</p>
+        </div>
+        <div id="player-actions">
+            <button id="call" class="game-btn">Call</button>
+            <button id="raise" class="game-btn">Raise</button>
+            <button id="fold" class="game-btn">Fold</button>
+        </div>
+        <div id="game-board">
+            <div id="dealer-hand">
+                <h2>Dealer's Hand</h2>
+                <div id="dealer-cards">
+                    {% for card in dealer_hand %}
+                        <span class="card">{{ card }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="player-hand">
+                <h2>Your Hand</h2>
+                <div id="player-cards">
+                    {% for card in player_hand %}
+                        <span class="card">{{ card }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <p>Game Result: {{ result }}</p>
+    </div>
+    <script src="{{ url_for('static', filename='js/poker.js') }}"></script>
+</body>
+</html>

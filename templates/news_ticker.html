@@ -1,0 +1,63 @@
+<div class="news-ticker-container">
+    <div class="ticker-wrapper">
+        <div class="ticker">
+            {% for headline in headlines %}
+                <div class="ticker-item">
+                    <span class="news-category">Latest</span> <!-- Category tag like "Latest News" -->
+                    <a href="{{ headline.link }}" target="_blank">{{ headline.title }}</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Ynet-style ticker styling */
+.news-ticker-container {
+    background-color: #000;
+    color: #fff;
+    padding: 10px 0;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ticker-wrapper {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.ticker {
+    display: flex;
+    white-space: nowrap;
+}
+
+.ticker-item {
+    display: inline-block;
+    padding: 0 30px;
+    white-space: nowrap;
+}
+
+.ticker-item a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.ticker-item a:hover {
+    color: #f00; /* Red color on hover */
+}
+
+.news-category {
+    background-color: #f00; /* Red for breaking news category */
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 10px;
+    padding: 5px;
+    border-radius: 5px;
+}
+</style>

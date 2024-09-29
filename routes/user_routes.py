@@ -1,8 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+import feedparser
+import random
+from datetime import datetime, timedelta
 
 # Blueprint for user-related routes
 user_blueprint = Blueprint('user_blueprint', __name__)
 
+# Simulated products data
 products = [
     {"id": 1, "name": "Jewish Temple 1", "price": 1000, "description": "Beautiful ancient temple.", "image_url": "Jewish_temple_1.jpg", "category": "Jewish Temple"},
     {"id": 2, "name": "Jewish Temple 2", "price": 2000, "description": "Stunning temple with gold.", "image_url": "Jewish_temple_2.jpeg", "category": "Jewish Temple"},
@@ -46,6 +50,19 @@ products = [
     {"id": 34, "name": "Homall L-Shaped Gaming Desk", "price": 63.99, "description": "Homall L-Shaped Gaming Desk 47 Inches Corner Office Desk with Removable Monitor Riser, Black", "image_url": "walmart_4.png", "category": "Walmart", "external_link": "https://www.walmart.com/ip/Homall-L-Shaped-Gaming-Desk-47-Inches-Corner-Office-Desk-with-Removable-Monitor-Riser-Black/1362962707"},
     {"id": 35, "name": "Mr. Kate Roxanne Platform Bed", "price": 269.98, "description": "Mr. Kate Roxanne Metal Platform Bed Frame with Cane Headboard, Queen, Black", "image_url": "walmart_5.png", "category": "Walmart", "external_link": "https://www.walmart.com/ip/Mr-Kate-Roxanne-Metal-Platform-Bed-Frame-with-Cane-Headboard-Queen-Black/5214368376"}
 ]
+
+# Simulated analytics data (page views, user visits, popular categories)
+product_views = {i: random.randint(50, 500) for i in range(1, 36)}
+category_views = {
+    "Jewish Temple": random.randint(300, 1200),
+    "Supermodel": random.randint(200, 800),
+    "Amazon": random.randint(100, 600),
+    "AliExpress": random.randint(100, 600),
+    "Etsy": random.randint(50, 400),
+    "Walmart": random.randint(50, 400)
+}
+user_visits = [(datetime.now() - timedelta(days=i), random.randint(100, 1000)) for i in range(30)]
+
 # Predefined users (Admin and Guest)
 users = {
     "Giliboi": {"password": "admin", "role": "admin"},
@@ -55,13 +72,21 @@ users = {
 # Home route displaying all products with sorting and search functionality
 @user_blueprint.route('/')
 def home():
+    # Parse RSS feed for news ticker
+    RSS_FEED_URL = 'http://www.ynet.co.il/Integration/StoryRss1854.xml'
+    feed = feedparser.parse(RSS_FEED_URL)
+    headlines = feed.entries[:10] if feed.entries else []
+
     sort_by = request.args.get('sort_by', 'none')
-    search_query = request.args.get('search', '').lower()
+    search_query = request.args.get('search', '').strip().lower()
     category_filter = request.args.get('category', 'all')
 
-    # Filter products by name and category (no longer by description)
-    filtered_products = [product for product in products if search_query in product['name'].lower()]
+    # Trigger the secret gambling page if "LETS GAMBLE" is searched
+    if search_query == "lets gamble":
+        return redirect(url_for('gambling_blueprint.gamble_home'))
 
+    # Filter products by name and category
+    filtered_products = [product for product in products if search_query in product['name'].lower()]
     if category_filter != 'all':
         filtered_products = [product for product in filtered_products if product['category'] == category_filter]
 
@@ -71,7 +96,20 @@ def home():
     elif sort_by == 'price_desc':
         filtered_products = sorted(filtered_products, key=lambda x: x['price'], reverse=True)
 
-    return render_template('home.html', products=filtered_products)
+    return render_template('home.html', products=filtered_products, headlines=headlines)
+
+
+# Admin-only analytics dashboard
+@user_blueprint.route('/admin/analytics')
+def analytics_dashboard():
+    if session.get('role') != 'admin':
+        flash('Access denied. Admins only.', 'danger')
+        return redirect(url_for('user_blueprint.home'))
+    
+    return render_template('admin/analytics_dashboard.html', 
+                            product_views=product_views, 
+                            category_views=category_views, 
+                            user_visits=user_visits)
 
 # Product details route
 @user_blueprint.route('/product/<int:product_id>')
@@ -79,7 +117,7 @@ def product_detail(product_id):
     product = next((prod for prod in products if prod["id"] == product_id), None)
     if product:
         if "external_link" in product:
-            return redirect(product['external_link'])  # Redirect to external link for external products
+            return redirect(product['external_link'])
         return render_template('product_detail.html', product=product)
     else:
         return "Product not found", 404
@@ -99,6 +137,7 @@ def add_to_cart_route(product_id):
     if product:
         cart.append(product)
         session['cart'] = cart
+        session['cart_item_count'] = len(cart)  # Update cart item count
     return jsonify(success=True)
 
 # Remove from Cart route
@@ -107,6 +146,7 @@ def remove_from_cart(product_id):
     cart = session.get('cart', [])
     cart = [item for item in cart if item['id'] != product_id]
     session['cart'] = cart
+    session['cart_item_count'] = len(cart)  # Update cart item count
     return redirect(url_for('user_blueprint.cart'))
 
 # Checkout route
@@ -124,7 +164,6 @@ def process_payment():
 
     # Here you would handle the actual payment process (e.g., integrate with a payment gateway)
     # For now, we'll just simulate successful payment processing
-
     flash('Payment processed successfully!', 'success')
     return redirect(url_for('user_blueprint.home'))
 
@@ -159,6 +198,7 @@ def logout():
 @user_blueprint.route('/clear_cart')
 def clear_cart():
     session['cart'] = []  # Empty the cart
+    session['cart_item_count'] = 0  # Reset cart item count
     return redirect(url_for('user_blueprint.cart'))
 
 # Admin-only access route
@@ -170,3 +210,11 @@ def admin_only(f):
         return f(*args, **kwargs)
     wrap.__name__ = f.__name__
     return wrap
+
+# Route for displaying Ynet News (RSS feed)
+@user_blueprint.route('/news_ticker')
+def news_ticker():
+    RSS_FEED_URL = 'http://www.ynet.co.il/Integration/StoryRss1854.xml'
+    feed = feedparser.parse(RSS_FEED_URL)
+    headlines = feed.entries[:10] if feed.entries else []
+    return render_template('news_ticker.html', headlines=headlines)
